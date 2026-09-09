@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import "./AdminOrders.css";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 function AdminOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
