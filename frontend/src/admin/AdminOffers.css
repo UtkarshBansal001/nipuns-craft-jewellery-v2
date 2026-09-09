@@ -1,0 +1,396 @@
+.create-offer-button {
+  border: 1px solid #222;
+  border-radius: 7px;
+  background: #222;
+  color: #fff;
+  padding: 12px 19px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.create-offer-button:hover {
+  background: #fff;
+  color: #222;
+}
+
+/* CREATE OFFER */
+
+.offer-form-section {
+  margin-bottom: 28px;
+  overflow: hidden;
+  border: 1px solid #e5ded4;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 5px 22px rgba(0, 0, 0, 0.025);
+}
+
+.offer-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px 20px;
+  padding: 27px 28px 29px;
+  border-top: 1px solid #eee8df;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 17px;
+}
+
+.form-group label {
+  color: #555;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #ddd5ca;
+  border-radius: 8px;
+  background: #fff;
+  color: #222;
+  padding: 12px 13px;
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.form-group input::placeholder {
+  color: #aaa;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #9a815d;
+  box-shadow: 0 0 0 3px rgba(154, 129, 93, 0.08);
+}
+
+.form-row {
+  display: contents;
+}
+
+.save-offer-button {
+  grid-column: 1 / -1;
+  width: fit-content;
+  margin-top: 7px;
+  padding: 12px 22px;
+  border: 1px solid #222;
+  border-radius: 7px;
+  background: #222;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.save-offer-button:hover {
+  background: #333;
+  transform: translateY(-1px);
+}
+
+/* OFFERS LIST */
+
+.offers-list {
+  overflow: hidden;
+  border: 1px solid #e5ded4;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 5px 22px rgba(0, 0, 0, 0.025);
+}
+
+.offer-card {
+  display: grid;
+  grid-template-columns: minmax(250px, 1fr) 260px auto;
+  align-items: center;
+  gap: 25px;
+  padding: 21px 25px;
+  border-bottom: 1px solid #eee8df;
+  transition: background 0.2s ease;
+}
+
+.offer-card:last-child {
+  border-bottom: none;
+}
+
+.offer-card:hover {
+  background: #fcfbf9;
+}
+
+.offer-main {
+  display: flex;
+  align-items: center;
+  gap: 17px;
+}
+
+.offer-code {
+  min-width: 92px;
+  box-sizing: border-box;
+  padding: 9px 10px;
+  border: 1px dashed #b9aa99;
+  border-radius: 5px;
+  background: #faf8f5;
+  color: #6e5b43;
+  text-align: center;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+}
+
+.offer-main strong {
+  display: block;
+  margin-bottom: 5px;
+  color: #222;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 15px;
+  font-weight: 400;
+}
+
+.offer-main span {
+  display: block;
+  color: #8b7558;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.offer-details {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.offer-details span {
+  color: #777;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.delete-offer-button {
+  padding: 8px 13px;
+  border: 1px solid #ead8d8;
+  border-radius: 6px;
+  background: #fff8f8;
+  color: #a04444;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.7px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.delete-offer-button:hover {
+  border-color: #d4aaaa;
+  background: #fceeee;
+  color: #8a3030;
+}
+
+/* EMPTY / LOADING */
+
+.offers-message {
+  min-height: 170px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 30px;
+  box-sizing: border-box;
+  color: #777;
+  font-size: 12px;
+  text-align: center;
+}
+
+.offers-message strong {
+  color: #333;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 18px;
+  font-weight: 400;
+}
+
+.offers-message span {
+  color: #999;
+  font-size: 11px;
+}
+
+/* TABLET */
+
+@media (max-width: 900px) {
+  .offer-card {
+    grid-template-columns: 1fr 190px auto;
+    gap: 18px;
+  }
+}
+
+/* MOBILE */
+
+@media (max-width: 750px) {
+  .offer-form {
+    display: block;
+    padding: 23px 20px 25px;
+  }
+
+  .form-row {
+    display: block;
+  }
+
+  .save-offer-button {
+    width: 100%;
+    margin-top: 4px;
+  }
+
+  .offer-card {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 20px;
+  }
+
+  .offer-details {
+    padding-left: 0;
+  }
+
+  .delete-offer-button {
+    width: fit-content;
+  }
+}
+
+@media (max-width: 500px) {
+  .offer-main {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .offer-code {
+    min-width: 100px;
+  }
+
+  .offer-form-section,
+  .offers-list {
+    border-radius: 11px;
+  }
+}
+
+/* ===== OFFERS PAGE - SIZE UPDATE ===== */
+
+/* Main header */
+.admin-header .header-label {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.admin-header h1 {
+  font-size: 38px;
+  line-height: 1.2;
+}
+
+.create-offer-button {
+  font-size: 14px;
+  padding: 13px 22px;
+}
+
+
+/* ===== SECTION HEADINGS ===== */
+
+.section-heading > div > p {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.section-heading h2 {
+  font-size: 30px;
+  line-height: 1.2;
+}
+
+
+/* ===== OFFER CARD ===== */
+
+.offer-card {
+  padding: 22px 24px;
+}
+
+/* Coupon code */
+.offer-code {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 9px 13px;
+}
+
+/* Offer title */
+.offer-main strong {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* Discount */
+.offer-main span {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* Offer details */
+.offer-details span {
+  font-size: 14px;
+}
+
+/* Delete button */
+.delete-offer-button {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 9px 15px;
+}
+
+
+/* ===== EMPTY / LOADING ===== */
+
+.offers-message strong {
+  font-size: 17px;
+}
+
+.offers-message span {
+  font-size: 14px;
+}
+
+
+/* ===== CREATE OFFER FORM ===== */
+
+.offer-form-section {
+  padding: 30px;
+}
+
+.offer-form .form-group label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.offer-form .form-group input,
+.offer-form .form-group select {
+  font-size: 15px;
+  padding: 13px 14px;
+}
+
+.offer-form .form-group input::placeholder {
+  font-size: 14px;
+  color: #999;
+  opacity: 1;
+}
+
+.save-offer-button {
+  font-size: 15px;
+  font-weight: 600;
+  padding: 13px 22px;
+}

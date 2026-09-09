@@ -1,0 +1,384 @@
+.customers-list {
+  overflow: hidden;
+  border: 1px solid #e5ded4;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 5px 22px rgba(0, 0, 0, 0.025);
+}
+
+.customer-row {
+  display: grid;
+  grid-template-columns: 45px 46px 1fr 155px;
+  align-items: center;
+  gap: 18px;
+  padding: 19px 25px;
+  border-bottom: 1px solid #eee8df;
+  transition: all 0.2s ease;
+}
+
+.customer-row:last-child {
+  border-bottom: none;
+}
+
+.customer-row:hover {
+  background: #fcfbf9;
+}
+
+.customer-number {
+  color: #aaa;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+}
+
+.customer-avatar {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  border: 1px solid #d9d0c4;
+  border-radius: 50%;
+  background: #f7f3ed;
+  color: #6f5b43;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 16px;
+}
+
+.customer-info {
+  min-width: 0;
+}
+
+.customer-info strong {
+  display: block;
+  margin-bottom: 5px;
+  overflow: hidden;
+  color: #222;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 15px;
+  font-weight: 400;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.customer-info span {
+  display: block;
+  overflow: hidden;
+  color: #777;
+  font-size: 11px;
+  line-height: 1.5;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.customer-date {
+  text-align: right;
+}
+
+.customer-date span {
+  display: block;
+  margin-bottom: 5px;
+  color: #aaa;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+
+.customer-date p {
+  margin: 0;
+  color: #555;
+  font-size: 11px;
+}
+
+.customer-count {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 11px 17px;
+  border: 1px solid #e0d8cd;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.customer-count span {
+  color: #888;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.customer-count strong {
+  color: #222;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 19px;
+  font-weight: 400;
+}
+
+.customers-message {
+  min-height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 40px 20px;
+  color: #888;
+  font-size: 12px;
+  text-align: center;
+}
+
+/* TABLET */
+
+@media (max-width: 800px) {
+  .customer-row {
+    grid-template-columns: 35px 44px 1fr 120px;
+    gap: 14px;
+    padding: 17px 20px;
+  }
+
+  .customer-date {
+    text-align: left;
+  }
+}
+
+/* MOBILE */
+
+@media (max-width: 700px) {
+  .customers-list {
+    border-radius: 11px;
+  }
+
+  .customer-row {
+    grid-template-columns: 32px 40px 1fr;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .customer-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 14px;
+  }
+
+  .customer-date {
+    display: none;
+  }
+
+  .customer-info strong {
+    font-size: 13px;
+  }
+
+  .customer-info span {
+    font-size: 10px;
+  }
+
+  .customer-count {
+    padding: 9px 12px;
+  }
+
+  .customer-count span {
+    font-size: 8px;
+  }
+
+  .customer-count strong {
+    font-size: 17px;
+  }
+}
+
+@media (max-width: 450px) {
+  .customer-row {
+    grid-template-columns: 25px 38px 1fr;
+    gap: 9px;
+    padding: 14px 12px;
+  }
+
+  .customer-avatar {
+    width: 38px;
+    height: 38px;
+  }
+
+  .customer-number {
+    font-size: 9px;
+  }
+
+  .customer-info strong {
+    font-size: 12px;
+  }
+}
+
+/* ===== CUSTOMERS PAGE - SIZE UPDATE ===== */
+
+/* Main heading */
+.admin-header .header-label {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.admin-header h1 {
+  font-size: 38px;
+  line-height: 1.2;
+}
+
+
+/* ===== CUSTOMER COUNT ===== */
+
+.customer-count {
+  padding: 14px 20px;
+}
+
+.customer-count span {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.customer-count strong {
+  font-size: 28px;
+  font-weight: 600;
+}
+
+
+/* ===== SECTION HEADING ===== */
+
+.section-heading > div > p {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.section-heading h2 {
+  font-size: 30px;
+  line-height: 1.2;
+}
+
+
+/* ===== CUSTOMER ROW ===== */
+
+.customer-row {
+  padding: 22px 24px;
+}
+
+
+/* Number */
+
+.customer-number {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+
+/* Avatar */
+
+.customer-avatar {
+  width: 48px;
+  height: 48px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+
+/* Name + Email */
+
+.customer-info strong {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.customer-info span {
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+
+/* Joined */
+
+.customer-date > span {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+
+.customer-date p {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+
+/* Loading / Empty */
+
+.customers-message {
+  font-size: 15px;
+}
+
+/* ===== CUSTOMERS - MEDIUM SIZE ===== */
+
+.admin-header .header-label {
+  font-size: 12px;
+  letter-spacing: 1.7px;
+}
+
+.admin-header h1 {
+  font-size: 32px;
+}
+
+.customer-count {
+  padding: 11px 16px;
+}
+
+.customer-count span {
+  font-size: 13px;
+}
+
+.customer-count strong {
+  font-size: 24px;
+}
+
+
+/* Section heading */
+
+.section-heading > div > p {
+  font-size: 12px;
+  letter-spacing: 1.7px;
+}
+
+.section-heading h2 {
+  font-size: 26px;
+}
+
+
+/* Customer rows */
+
+.customer-row {
+  padding: 18px 20px;
+}
+
+.customer-number {
+  font-size: 14px;
+}
+
+.customer-avatar {
+  width: 44px;
+  height: 44px;
+  font-size: 16px;
+}
+
+.customer-info strong {
+  font-size: 16px;
+}
+
+.customer-info span {
+  font-size: 13px;
+}
+
+.customer-date > span {
+  font-size: 11px;
+  letter-spacing: 1.3px;
+}
+
+.customer-date p {
+  font-size: 14px;
+}
+
+.customers-message {
+  font-size: 14px;
+}
