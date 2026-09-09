@@ -1,6 +1,6 @@
 
 
-
+import AdminProtectedRoute from "./admin/AdminProtectedRoute";
 import AdminSettings from "./admin/AdminSettings";
 import ScrollToTop from "./ScrollToTop";
 import Footer from "./customer/Footer";
@@ -79,10 +79,7 @@ function App() {
   element={<Wishlist />}
 />
 
-<Route
-path="/admin/settings"
-element={<AdminSettings />}
-/>
+
 
 <Route
   path="/customer/signup"
@@ -113,19 +110,38 @@ element={<AdminSettings />}
           element={<AdminLogin />}
         />
 
-        <Route
-          path="/admin"
-          element={<AdminDashboard />}
-        />
+        <Route element={<AdminProtectedRoute />}>
+  <Route
+    path="/admin"
+    element={<AdminDashboard />}
+  />
 
-        <Route
-  path="/admin/products"
-  element={<AdminProducts />}
+  <Route
+    path="/admin/products"
+    element={<AdminProducts />}
+  />
+
+  <Route
+    path="/admin/orders"
+    element={<AdminOrders />}
+  />
+
+  <Route
+    path="/admin/offers"
+    element={<AdminOffers />}
+  />
+
+  <Route
+    path="/admin/customers"
+    element={<AdminCustomers />}
+  />
+
+  <Route
+  path="/admin/settings"
+  element={<AdminSettings />}
 />
 
-<Route path="/admin/orders" element={<AdminOrders />} />
-<Route path="/admin/offers" element={<AdminOffers />} />
-<Route path="/admin/customers" element={<AdminCustomers />} />
+</Route>
 
         <Route
           path="*"
