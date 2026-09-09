@@ -4,6 +4,8 @@ import { Link, useNavigate } from "react-router-dom";
 import Navbar from "./Navbar";
 import "./CustomerHome.css";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const RAZORPAY_KEY_ID = "rzp_test_TZNc3IiHtwSsJp";
 
 const loadRazorpay = () => {
@@ -78,7 +80,7 @@ localStorage.getItem("nipunsCart") || "[]"
 
   try {
     const response = await axios.get(
-      "http://localhost:5000/api/products"
+      `${API_URL}/api/products`
     );
 
     if (response.data.success) {
@@ -170,7 +172,7 @@ if (!couponCode.trim()) {
 
 try {
   const response = await axios.post(
-    "http://localhost:5000/api/offers/apply",
+    `${API_URL}/api/offers/apply`,
     {
       code: couponCode.trim(),
       orderAmount: subtotal,
@@ -284,7 +286,7 @@ return;
 
 try {
   const response = await axios.post(
-    "http://localhost:5000/api/orders",
+    `${API_URL}/api/orders`,
     {
       customer: customer.id,
 
@@ -378,7 +380,7 @@ try {
   }
 
  const response = await axios.post(
-"http://localhost:5000/api/payment/create-order",
+`${API_URL}/api/payment/create-order`,
 { items: cart.map((item) => ({ product: item._id, quantity: item.quantity, })), couponCode: appliedCoupon?.code || "", },
 {
 headers: {
@@ -410,7 +412,7 @@ Authorization: `Bearer ${localStorage.getItem( "customerToken" )}`,
       try {
         const verifyResponse =
           await axios.post(
-"http://localhost:5000/api/payment/verify-payment",
+`${API_URL}/api/payment/verify-payment`,
 {
 razorpay_order_id:
 paymentResponse.razorpay_order_id,
@@ -435,7 +437,7 @@ Authorization: `Bearer ${localStorage.getItem( "customerToken" )}`,
         ) {
           const orderResponse =
             await axios.post(
-              "http://localhost:5000/api/orders",
+              `${API_URL}/api/orders`,
               {
                 customer:
                   customer.id,

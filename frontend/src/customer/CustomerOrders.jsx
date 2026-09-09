@@ -4,6 +4,8 @@ import axios from "axios";
 import Navbar from "./Navbar";
 import "./CustomerHome.css";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 function CustomerOrders() {
   const navigate = useNavigate();
 
@@ -22,7 +24,7 @@ function CustomerOrders() {
   const handleReorder = async (order) => {
   try {
     const response = await axios.get(
-      "http://localhost:5000/api/products"
+      `${API_URL}/api/products`
     );
 
     if (!response.data.success) {
@@ -121,7 +123,7 @@ function CustomerOrders() {
     const token = localStorage.getItem("customerToken");
 
     const response = await axios.get(
-      `http://localhost:5000/api/orders/customer/${customerId}`,
+      `${API_URL}/api/orders/customer/${customerId}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,

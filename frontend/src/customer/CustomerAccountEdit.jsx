@@ -5,6 +5,8 @@ import axios from "axios";
 import Navbar from "./Navbar";
 import "./CustomerHome.css";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 function CustomerAccountEdit() {
   const navigate = useNavigate();
 
@@ -49,7 +51,7 @@ function CustomerAccountEdit() {
       const token = localStorage.getItem("customerToken");
 
       const response = await axios.put(
-        "http://localhost:5000/api/customer-auth/profile",
+        `${API_URL}/api/customer-auth/profile`,
         {
           name: name.trim(),
           phone: phone.trim(),
