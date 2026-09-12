@@ -231,17 +231,10 @@ return (
 
       <div className="hero-image">
 
-        {products[0]?.images?.[0] ? (
-          <img
-            src={products[0].images[0]}
-            alt="Nipun's Craft Jewellery"
-          />
-        ) : (
-          <img
-            src="https://images.unsplash.com/photo-1611652022419-a9419f74343d?auto=format&fit=crop&w=1200&q=85"
-            alt="Nipun's Craft Jewellery"
-          />
-        )}
+        <img
+  src="https://images.unsplash.com/photo-1611652022419-a9419f74343d?auto=format&fit=crop&w=1200&q=85"
+  alt="Nipun's Craft Jewellery"
+/>
 
       
 
