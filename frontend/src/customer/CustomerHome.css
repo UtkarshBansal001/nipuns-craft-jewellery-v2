@@ -81,38 +81,160 @@
 }
 
 /* Mobile */
+/* =========================
+   NAVBAR RESPONSIVE FIX
+========================= */
+
+.customer-navbar {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: clip;
+}
+
+.navbar-inner {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+/* Prevent icons/buttons from shrinking strangely */
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.nav-icon-button,
+.menu-button {
+  flex-shrink: 0;
+}
+
+
+/* =========================
+   MOBILE NAVBAR
+========================= */
+
 @media (max-width: 768px) {
+
   .navbar-inner {
-    padding: 16px 20px;
+    width: 100%;
+    padding: 14px 16px;
+    gap: 10px;
   }
 
   .brand-logo {
     font-size: 20px;
+    flex-shrink: 1;
+    min-width: 0;
   }
 
+  .brand-main {
+    display: block;
+  }
+
+  .brand-sub {
+    display: block;
+  }
+
+  /* Hide desktop navigation */
   .nav-links {
     display: none;
     position: absolute;
-    top: 73px;
+    top: 100%;
     left: 0;
     right: 0;
+    width: 100%;
+    box-sizing: border-box;
+
     background: #fff;
     border-bottom: 1px solid #eee;
+
     padding: 20px;
     flex-direction: column;
     align-items: flex-start;
     gap: 20px;
+
+    z-index: 1001;
   }
 
   .nav-links.open {
     display: flex;
   }
 
+  /* MOBILE:
+     Account + Search + Menu only
+  */
+
+  .navbar-actions {
+    gap: 4px;
+  }
+
+  .wishlist-icon,
+  .cart-icon {
+    display: none !important;
+  }
+
+  .nav-icon-button {
+    width: 34px;
+    height: 34px;
+    font-size: 22px;
+    padding: 0;
+  }
+
   .menu-button {
-    display: block;
+    display: flex;
+    width: 34px;
+    height: 34px;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    font-size: 23px;
+  }
+
+  /* Search bar stays inside viewport */
+  .search-bar {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0 16px 15px;
+  }
+
+  .search-bar-inner {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .search-bar input {
+    min-width: 0;
   }
 }
 
+
+/* Smaller phones */
+
+@media (max-width: 400px) {
+
+  .navbar-inner {
+    padding: 13px 12px;
+  }
+
+  .brand-logo {
+    font-size: 18px;
+  }
+
+  .brand-sub {
+    font-size: 8px !important;
+    letter-spacing: 3px !important;
+  }
+
+  .nav-icon-button,
+  .menu-button {
+    width: 32px;
+    height: 32px;
+  }
+}
 
 
 /* =========================
@@ -7967,3 +8089,155 @@ body {
     margin-bottom: 0;
   }
 }
+
+/* Hide Wishlist + Cart on tablet/mobile navbar */
+
+
+
+
+/* =========================================
+   FINAL NAVBAR OVERFLOW + RESPONSIVE FIX
+========================================= */
+
+.customer-navbar {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+  box-sizing: border-box;
+}
+
+.navbar-inner {
+  width: 100%;
+  max-width: 1350px;
+  box-sizing: border-box;
+}
+
+/* IMPORTANT:
+   Logo must be allowed to shrink */
+.customer-navbar .brand-logo {
+  min-width: 0 !important;
+  max-width: 100%;
+  flex-shrink: 1;
+}
+
+
+/* =========================================
+   TABLET + MOBILE
+========================================= */
+
+@media (max-width: 1000px) {
+
+  .navbar-inner {
+    width: 100%;
+    max-width: 100%;
+    padding: 0 16px;
+    box-sizing: border-box;
+  }
+
+  /* Hide desktop links */
+  .nav-links {
+    display: none !important;
+  }
+
+  .nav-links.open {
+    display: flex !important;
+  }
+
+  /* Keep only Account + Search + Menu */
+  .navbar-actions .wishlist-icon,
+  .navbar-actions .cart-icon {
+    display: none !important;
+  }
+
+  .navbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .nav-icon-button,
+  .menu-button {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+  }
+
+  .menu-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Mobile menu */
+  .nav-links.open {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    width: 100%;
+    box-sizing: border-box;
+
+    flex-direction: column;
+    align-items: flex-start;
+
+    padding: 22px 20px;
+    gap: 20px;
+
+    background: #faf9f6;
+    border-bottom: 1px solid #e5e0d8;
+
+    z-index: 1001;
+  }
+}
+
+
+/* =========================================
+   SMALL MOBILE
+========================================= */
+
+@media (max-width: 600px) {
+
+  .navbar-inner {
+    padding: 0 12px;
+  }
+
+  .customer-navbar .brand-logo {
+    min-width: 0 !important;
+    max-width: calc(100% - 120px);
+  }
+
+  .customer-navbar .brand-main {
+    font-size: 25px !important;
+    white-space: nowrap;
+  }
+
+  .customer-navbar .brand-sub {
+    font-size: 9px !important;
+  }
+
+  .navbar-actions {
+    gap: 2px;
+  }
+
+  .nav-icon-button,
+  .menu-button {
+    width: 34px;
+    height: 34px;
+  }
+}
+
+
+/* =========================================
+   STOP HORIZONTAL PAGE SCROLL
+========================================= */
+
+html,
+body,
+#root {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* FINAL CART/WISHLIST NAVBAR FIX */
+

@@ -26,44 +26,71 @@ function AdminDashboard() {
     }
 
     if (adminData) {
-      setAdmin(JSON.parse(adminData));
+      try {
+        setAdmin(JSON.parse(adminData));
+      } catch (error) {
+        console.error("Admin data error:", error);
+      }
     }
 
     fetchDashboardData(token);
   }, [navigate]);
 
+  // ==========================================
+  // FETCH DASHBOARD DATA
+  // ==========================================
   const fetchDashboardData = async (token) => {
+    setLoading(true);
+
+    const authConfig = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    // ==========================================
+    // PRODUCTS
+    // ==========================================
     try {
-      const [productsResponse, ordersResponse, customersResponse] =
-  await Promise.all([
-    axios.get(`${API_URL}/api/products`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }),
+      const productsResponse = await axios.get(
+        `${API_URL}/api/products`,
+        authConfig
+      );
 
-    axios.get(`${API_URL}/api/orders/admin/all`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }),
+      console.log("PRODUCT API RESPONSE:", productsResponse.data);
 
-    axios.get(`${API_URL}/api/customer-auth/admin/all`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }),
-  ]);
-
-      // Products
       if (productsResponse.data.success) {
-        setProductCount(productsResponse.data.count);
+        const products = productsResponse.data.products || [];
+
+        setProductCount(
+          productsResponse.data.count ?? products.length
+        );
       }
+    } catch (error) {
+      console.error(
+        "Products API error:",
+        error.response?.status,
+        error.response?.data || error.message
+      );
 
-      // Orders
+      setProductCount(0);
+    }
+
+    // ==========================================
+    // ORDERS
+    // ==========================================
+    try {
+      const ordersResponse = await axios.get(
+        `${API_URL}/api/orders/admin/all`,
+        authConfig
+      );
+
+      console.log("ORDERS API RESPONSE:", ordersResponse.data);
+
       if (ordersResponse.data.success) {
-        const orders = ordersResponse.data.orders;
+        const orders = ordersResponse.data.orders || [];
 
+        // Total orders
         setOrderCount(orders.length);
 
         // Latest 5 orders
@@ -71,35 +98,80 @@ function AdminDashboard() {
 
         // Revenue excluding cancelled orders
         const revenue = orders
-          .filter((order) => order.orderStatus !== "Cancelled")
+          .filter(
+            (order) => order.orderStatus !== "Cancelled"
+          )
           .reduce(
-            (total, order) => total + (order.totalAmount || 0),
+            (total, order) =>
+              total + (Number(order.totalAmount) || 0),
             0
           );
 
         setTotalRevenue(revenue);
-
-        // Unique customers who have placed orders
-        if (customersResponse.data.success) {
-  setCustomerCount(customersResponse.data.count);
-}
       }
     } catch (error) {
-      console.error("Dashboard error:", error.message);
-    } finally {
-      setLoading(false);
+      console.error(
+        "Orders API error:",
+        error.response?.status,
+        error.response?.data || error.message
+      );
+
+      setOrderCount(0);
+      setTotalRevenue(0);
+      setRecentOrders([]);
     }
+
+    // ==========================================
+    // CUSTOMERS
+    // ==========================================
+    try {
+      const customersResponse = await axios.get(
+        `${API_URL}/api/customer-auth/admin/all`,
+        authConfig
+      );
+
+      console.log(
+        "CUSTOMERS API RESPONSE:",
+        customersResponse.data
+      );
+
+      if (customersResponse.data.success) {
+        const customers =
+          customersResponse.data.customers || [];
+
+        setCustomerCount(
+          customersResponse.data.count ?? customers.length
+        );
+      }
+    } catch (error) {
+      console.error(
+        "Customers API error:",
+        error.response?.status,
+        error.response?.data || error.message
+      );
+
+      setCustomerCount(0);
+    }
+
+    setLoading(false);
   };
 
+  // ==========================================
+  // REFRESH
+  // ==========================================
   const handleRefresh = () => {
     const token = localStorage.getItem("adminToken");
 
     if (token) {
-      setLoading(true);
       fetchDashboardData(token);
+    } else {
+      navigate("/admin/login");
     }
   };
 
+  // ==========================================
+  // LOGOUT
+  // ==========================================
   const handleLogout = () => {
     localStorage.removeItem("adminToken");
     localStorage.removeItem("adminData");
@@ -110,19 +182,25 @@ function AdminDashboard() {
   return (
     <div className="admin-dashboard">
 
-      {/* Sidebar */}
+      {/* ==========================================
+          SIDEBAR
+      ========================================== */}
       <aside className="admin-sidebar">
 
         <div className="sidebar-brand">
-          <div className="sidebar-logo">
-<img src="\Nipun logo.png" alt="Nipun's Craft Jewellery" />
 
-</div>
+          <div className="sidebar-logo">
+            <img
+              src="/Nipun logo.png"
+              alt="Nipun's Craft Jewellery"
+            />
+          </div>
 
           <div>
             <h2>Nipun's Craft</h2>
             <span>JEWELLERY</span>
           </div>
+
         </div>
 
         <nav className="sidebar-nav">
@@ -188,10 +266,14 @@ function AdminDashboard() {
 
       </aside>
 
-      {/* Main Content */}
+      {/* ==========================================
+          MAIN CONTENT
+      ========================================== */}
       <main className="admin-main">
 
-        {/* Header */}
+        {/* ==========================================
+            HEADER
+        ========================================== */}
         <header className="admin-header">
 
           <div>
@@ -204,18 +286,22 @@ function AdminDashboard() {
             <button
               className="dashboard-refresh-button"
               onClick={handleRefresh}
+              disabled={loading}
             >
-              ↻ Refresh
+              ↻ {loading ? "Refreshing..." : "Refresh"}
             </button>
 
             <div className="admin-profile">
 
               <div className="profile-avatar">
-<img src="/Nipun logo2.png" alt="Nipun's Craft Jewellery" />
-
-</div>
+                <img
+                  src="/Nipun logo2.png"
+                  alt="Nipun's Craft Jewellery"
+                />
+              </div>
 
               <div>
+
                 <strong>
                   {admin?.name || "Admin"}
                 </strong>
@@ -223,6 +309,7 @@ function AdminDashboard() {
                 <span>
                   {admin?.email || "Administrator"}
                 </span>
+
               </div>
 
             </div>
@@ -231,20 +318,26 @@ function AdminDashboard() {
 
         </header>
 
-        {/* Welcome */}
+        {/* ==========================================
+            WELCOME CARD
+        ========================================== */}
         <section className="welcome-card">
 
           <div>
+
             <p className="welcome-small">
               Welcome back
             </p>
 
-            <h2 className="welcome-title">Manage your jewellery store</h2>
+            <h2 className="welcome-title">
+              Manage your jewellery store
+            </h2>
 
             <p>
               Keep your products, orders and offers
               organized from one place.
             </p>
+
           </div>
 
           <div className="welcome-icon">
@@ -253,10 +346,12 @@ function AdminDashboard() {
 
         </section>
 
-        {/* Stats */}
+        {/* ==========================================
+            STATS
+        ========================================== */}
         <section className="stats-grid">
 
-          {/* Products */}
+          {/* PRODUCTS */}
           <div className="stat-card">
 
             <div className="stat-icon">
@@ -264,16 +359,18 @@ function AdminDashboard() {
             </div>
 
             <div>
+
               <span>Total Products</span>
 
               <strong>
                 {loading ? "—" : productCount}
               </strong>
+
             </div>
 
           </div>
 
-          {/* Orders */}
+          {/* ORDERS */}
           <div className="stat-card">
 
             <div className="stat-icon">
@@ -281,16 +378,18 @@ function AdminDashboard() {
             </div>
 
             <div>
+
               <span>Total Orders</span>
 
               <strong>
                 {loading ? "—" : orderCount}
               </strong>
+
             </div>
 
           </div>
 
-          {/* Revenue */}
+          {/* REVENUE */}
           <div className="stat-card">
 
             <div className="stat-icon">
@@ -298,6 +397,7 @@ function AdminDashboard() {
             </div>
 
             <div>
+
               <span>Total Revenue</span>
 
               <strong>
@@ -306,11 +406,12 @@ function AdminDashboard() {
                   ? "—"
                   : totalRevenue.toLocaleString("en-IN")}
               </strong>
+
             </div>
 
           </div>
 
-          {/* Customers */}
+          {/* CUSTOMERS */}
           <div className="stat-card">
 
             <div className="stat-icon">
@@ -318,25 +419,32 @@ function AdminDashboard() {
             </div>
 
             <div>
+
               <span>Customers</span>
 
               <strong>
                 {loading ? "—" : customerCount}
               </strong>
+
             </div>
 
           </div>
 
         </section>
 
-        {/* Recent Orders */}
+        {/* ==========================================
+            RECENT ORDERS
+        ========================================== */}
         <section className="dashboard-section">
 
           <div className="section-heading">
 
             <div>
+
               <p>RECENT ACTIVITY</p>
+
               <h2>Recent Orders</h2>
+
             </div>
 
             <button
@@ -407,9 +515,11 @@ function AdminDashboard() {
                   </div>
 
                   <span
-                    className={`recent-order-status ${order.orderStatus
-                      .toLowerCase()
-                      .replace(" ", "-")}`}
+                    className={`recent-order-status ${
+                      order.orderStatus
+                        ?.toLowerCase()
+                        .replace(" ", "-") || ""
+                    }`}
                   >
                     {order.orderStatus}
                   </span>
@@ -424,21 +534,26 @@ function AdminDashboard() {
 
         </section>
 
-        {/* Quick Actions */}
+        {/* ==========================================
+            QUICK ACTIONS
+        ========================================== */}
         <section className="dashboard-section">
 
           <div className="section-heading">
 
             <div>
+
               <p>STORE MANAGEMENT</p>
+
               <h2>Quick Actions</h2>
+
             </div>
 
           </div>
 
           <div className="quick-actions">
 
-            {/* Add Product */}
+            {/* ADD PRODUCT */}
             <button
               onClick={() => navigate("/admin/products")}
               className="action-card"
@@ -449,6 +564,7 @@ function AdminDashboard() {
               </div>
 
               <div>
+
                 <strong>
                   Add Product
                 </strong>
@@ -456,6 +572,7 @@ function AdminDashboard() {
                 <span>
                   Add a new jewellery product
                 </span>
+
               </div>
 
               <b>
@@ -464,7 +581,7 @@ function AdminDashboard() {
 
             </button>
 
-            {/* Manage Orders */}
+            {/* MANAGE ORDERS */}
             <button
               onClick={() => navigate("/admin/orders")}
               className="action-card"
@@ -475,6 +592,7 @@ function AdminDashboard() {
               </div>
 
               <div>
+
                 <strong>
                   Manage Orders
                 </strong>
@@ -482,6 +600,7 @@ function AdminDashboard() {
                 <span>
                   View and update customer orders
                 </span>
+
               </div>
 
               <b>
@@ -490,7 +609,7 @@ function AdminDashboard() {
 
             </button>
 
-            {/* Create Offer */}
+            {/* CREATE OFFER */}
             <button
               onClick={() => navigate("/admin/offers")}
               className="action-card"
@@ -501,6 +620,7 @@ function AdminDashboard() {
               </div>
 
               <div>
+
                 <strong>
                   Create Offer
                 </strong>
@@ -508,6 +628,7 @@ function AdminDashboard() {
                 <span>
                   Create discounts and coupons
                 </span>
+
               </div>
 
               <b>
