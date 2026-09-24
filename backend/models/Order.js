@@ -20,10 +20,11 @@ const orderSchema = new mongoose.Schema(
           type: String,
           required: true,
         },
+
         productCode: {
-  type: String,
-  default: "",
-},
+          type: String,
+          default: "",
+        },
 
         image: {
           type: String,
@@ -75,44 +76,77 @@ const orderSchema = new mongoose.Schema(
     },
 
     paymentStatus: {
-  type: String,
-  enum: ["Pending", "Paid", "Failed"],
-  default: "Pending",
-},
+      type: String,
+      enum: ["Pending", "Paid", "Failed"],
+      default: "Pending",
+    },
 
-razorpayOrderId: {
-  type: String,
-  default: "",
-},
+    razorpayOrderId: {
+      type: String,
+      default: "",
+    },
 
-razorpayPaymentId: {
-  type: String,
-  default: "",
-},
+    razorpayPaymentId: {
+      type: String,
+      default: "",
+    },
+
+    invoiceNumber: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
 
     totalAmount: {
       type: Number,
       required: true,
     },
+
     subtotal: {
-  type: Number,
-  required: true,
-},
+      type: Number,
+      required: true,
+    },
 
-discountAmount: {
-  type: Number,
-  default: 0,
-},
+    discountAmount: {
+      type: Number,
+      default: 0,
+    },
 
-couponCode: {
-  type: String,
-  default: "",
-},
+    couponCode: {
+      type: String,
+      default: "",
+    },
 
-shippingAmount: {
-  type: Number,
-  default: 0,
-},
+    shippingAmount: {
+      type: Number,
+      default: 0,
+    },
+
+    // Shipping & Tracking
+    courierName: {
+      type: String,
+      default: "",
+    },
+
+    trackingNumber: {
+      type: String,
+      default: "",
+    },
+
+    trackingUrl: {
+      type: String,
+      default: "",
+    },
+
+    shippedAt: {
+      type: Date,
+      default: null,
+    },
+
+    deliveredAt: {
+      type: Date,
+      default: null,
+    },
 
     orderStatus: {
       type: String,
