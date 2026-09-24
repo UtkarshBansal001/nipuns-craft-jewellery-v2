@@ -9,6 +9,7 @@ function AdminOrders() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [updatingOrder, setUpdatingOrder] = useState("");
+  const [downloadingInvoice, setDownloadingInvoice] = useState("");
 
   // Shipping form
   const [shippingOrder, setShippingOrder] = useState(null);
@@ -49,8 +50,65 @@ function AdminOrders() {
     fetchOrders();
   }, []);
 
+  // Download invoice
+  const handleDownloadInvoice = async (orderId) => {
+    try {
+      setDownloadingInvoice(orderId);
+
+      const token = localStorage.getItem("adminToken");
+
+      const response = await axios.get(
+        `${API_URL}/api/invoices/admin/${orderId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          responseType: "blob",
+        }
+      );
+
+      const blob = new Blob([response.data], {
+        type: "application/pdf",
+      });
+
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+
+      const order = orders.find(
+        (item) => item._id === orderId
+      );
+
+      link.download = `${
+        order?.invoiceNumber || `invoice-${orderId}`
+      }.pdf`;
+
+      document.body.appendChild(link);
+      link.click();
+
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error(
+        "Invoice download error:",
+        error
+      );
+
+      alert(
+        error.response?.data?.message ||
+          "Failed to download invoice."
+      );
+    } finally {
+      setDownloadingInvoice("");
+    }
+  };
+
   // Normal status change
-  const handleStatusChange = async (orderId, newStatus) => {
+  const handleStatusChange = async (
+    orderId,
+    newStatus
+  ) => {
     if (newStatus === "Shipped") {
       const order = orders.find(
         (item) => item._id === orderId
@@ -58,9 +116,17 @@ function AdminOrders() {
 
       setShippingOrder(order);
 
-      setCourierName(order?.courierName || "");
-      setTrackingNumber(order?.trackingNumber || "");
-      setTrackingUrl(order?.trackingUrl || "");
+      setCourierName(
+        order?.courierName || ""
+      );
+
+      setTrackingNumber(
+        order?.trackingNumber || ""
+      );
+
+      setTrackingUrl(
+        order?.trackingUrl || ""
+      );
 
       return;
     }
@@ -77,7 +143,8 @@ function AdminOrders() {
     try {
       setUpdatingOrder(orderId);
 
-      const token = localStorage.getItem("adminToken");
+      const token =
+        localStorage.getItem("adminToken");
 
       const response = await axios.put(
         `${API_URL}/api/orders/admin/${orderId}/status`,
@@ -119,17 +186,23 @@ function AdminOrders() {
     }
 
     try {
-      setUpdatingOrder(shippingOrder._id);
+      setUpdatingOrder(
+        shippingOrder._id
+      );
 
-      const token = localStorage.getItem("adminToken");
+      const token =
+        localStorage.getItem("adminToken");
 
       const response = await axios.put(
         `${API_URL}/api/orders/admin/${shippingOrder._id}/status`,
         {
           orderStatus: "Shipped",
-          courierName: courierName.trim(),
-          trackingNumber: trackingNumber.trim(),
-          trackingUrl: trackingUrl.trim(),
+          courierName:
+            courierName.trim(),
+          trackingNumber:
+            trackingNumber.trim(),
+          trackingUrl:
+            trackingUrl.trim(),
         },
         {
           headers: {
@@ -187,7 +260,9 @@ function AdminOrders() {
           onClick={fetchOrders}
           disabled={loading}
         >
-          {loading ? "Refreshing..." : "REFRESH ORDERS"}
+          {loading
+            ? "Refreshing..."
+            : "REFRESH ORDERS"}
         </button>
       </div>
 
@@ -208,7 +283,10 @@ function AdminOrders() {
                   <span>ORDER ID</span>
 
                   <strong>
-                    #{order._id.slice(-6).toUpperCase()}
+                    #
+                    {order._id
+                      .slice(-6)
+                      .toUpperCase()}
                   </strong>
                 </div>
 
@@ -218,13 +296,16 @@ function AdminOrders() {
                   <p>
                     {new Date(
                       order.createdAt
-                    ).toLocaleString("en-IN", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                    ).toLocaleString(
+                      "en-IN",
+                      {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }
+                    )}
                   </p>
                 </div>
 
@@ -240,41 +321,47 @@ function AdminOrders() {
 
               {/* PRODUCTS */}
               <div className="admin-order-items">
-                {order.items.map((item, index) => (
-                  <div
-                    className="admin-order-item"
-                    key={`${order._id}-${index}`}
-                  >
-                    <div className="admin-order-item-image">
-                      {item.image && (
-                        <img
-                          src={item.image}
-                          alt={item.name}
-                        />
-                      )}
-                    </div>
-
-                    <div className="admin-order-item-info">
-                      <h3>{item.name}</h3>
-
-                      <p>
-                        Quantity: {item.quantity}
-                      </p>
-
-                      <p>
-                        Product Code:{" "}
-                        {item.productCode || "N/A"}
-                      </p>
-
-                      <p>
-                        ₹
-                        {item.price.toLocaleString(
-                          "en-IN"
+                {order.items.map(
+                  (item, index) => (
+                    <div
+                      className="admin-order-item"
+                      key={`${order._id}-${index}`}
+                    >
+                      <div className="admin-order-item-image">
+                        {item.image && (
+                          <img
+                            src={item.image}
+                            alt={item.name}
+                          />
                         )}
-                      </p>
+                      </div>
+
+                      <div className="admin-order-item-info">
+                        <h3>
+                          {item.name}
+                        </h3>
+
+                        <p>
+                          Quantity:{" "}
+                          {item.quantity}
+                        </p>
+
+                        <p>
+                          Product Code:{" "}
+                          {item.productCode ||
+                            "N/A"}
+                        </p>
+
+                        <p>
+                          ₹
+                          {item.price.toLocaleString(
+                            "en-IN"
+                          )}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                )}
               </div>
 
               {/* DETAILS */}
@@ -298,14 +385,17 @@ function AdminOrders() {
                   <span>PAYMENT</span>
 
                   <p>
-                    {order.paymentMethod === "cod"
+                    {order.paymentMethod ===
+                    "cod"
                       ? "Cash on Delivery"
                       : "Online Payment"}
                   </p>
                 </div>
 
                 <div className="admin-order-detail">
-                  <span>DELIVERY ADDRESS</span>
+                  <span>
+                    DELIVERY ADDRESS
+                  </span>
 
                   <p>
                     {order.address},{" "}
@@ -317,11 +407,14 @@ function AdminOrders() {
               </div>
 
               {/* SHIPPING / TRACKING DETAILS */}
-              {order.orderStatus === "Shipped" ||
-              order.orderStatus === "Delivered" ? (
+              {order.orderStatus ===
+                "Shipped" ||
+              order.orderStatus ===
+                "Delivered" ? (
                 <div className="admin-order-shipping">
                   <div>
                     <span>COURIER</span>
+
                     <p>
                       {order.courierName ||
                         "Not available"}
@@ -329,7 +422,10 @@ function AdminOrders() {
                   </div>
 
                   <div>
-                    <span>TRACKING NUMBER</span>
+                    <span>
+                      TRACKING NUMBER
+                    </span>
+
                     <p>
                       {order.trackingNumber ||
                         "Not available"}
@@ -338,11 +434,15 @@ function AdminOrders() {
 
                   {order.trackingUrl && (
                     <div>
-                      <span>TRACKING LINK</span>
+                      <span>
+                        TRACKING LINK
+                      </span>
 
                       <p>
                         <a
-                          href={order.trackingUrl}
+                          href={
+                            order.trackingUrl
+                          }
                           target="_blank"
                           rel="noopener noreferrer"
                         >
@@ -354,7 +454,9 @@ function AdminOrders() {
 
                   {order.shippedAt && (
                     <div>
-                      <span>SHIPPED ON</span>
+                      <span>
+                        SHIPPED ON
+                      </span>
 
                       <p>
                         {new Date(
@@ -375,7 +477,9 @@ function AdminOrders() {
 
                   {order.deliveredAt && (
                     <div>
-                      <span>DELIVERED ON</span>
+                      <span>
+                        DELIVERED ON
+                      </span>
 
                       <p>
                         {new Date(
@@ -400,23 +504,31 @@ function AdminOrders() {
               <div className="admin-order-bottom">
                 <div className="admin-order-total">
                   <div className="admin-order-price-row">
-                    <span>SUBTOTAL</span>
+                    <span>
+                      SUBTOTAL
+                    </span>
 
                     <span>
                       ₹
                       {(
                         order.subtotal ??
                         order.totalAmount
-                      ).toLocaleString("en-IN")}
+                      ).toLocaleString(
+                        "en-IN"
+                      )}
                     </span>
                   </div>
 
                   {order.couponCode &&
-                    order.discountAmount > 0 && (
+                    order.discountAmount >
+                      0 && (
                       <div className="admin-order-price-row discount">
                         <span>
                           DISCOUNT (
-                          {order.couponCode})
+                          {
+                            order.couponCode
+                          }
+                          )
                         </span>
 
                         <span>
@@ -429,7 +541,9 @@ function AdminOrders() {
                     )}
 
                   <div className="admin-order-price-row">
-                    <span>SHIPPING</span>
+                    <span>
+                      SHIPPING
+                    </span>
 
                     <span>
                       {(order.shippingAmount ??
@@ -445,7 +559,9 @@ function AdminOrders() {
                   </div>
 
                   <div className="admin-order-grand-total">
-                    <span>ORDER TOTAL</span>
+                    <span>
+                      ORDER TOTAL
+                    </span>
 
                     <strong>
                       ₹
@@ -456,15 +572,20 @@ function AdminOrders() {
                   </div>
                 </div>
 
-                {/* STATUS */}
+                {/* STATUS + INVOICE */}
                 <div className="admin-order-status">
                   <span>STATUS</span>
 
                   <select
                     className={`admin-status-select ${order.orderStatus
                       .toLowerCase()
-                      .replace(" ", "-")}`}
-                    value={order.orderStatus}
+                      .replace(
+                        " ",
+                        "-"
+                      )}`}
+                    value={
+                      order.orderStatus
+                    }
                     onChange={(e) =>
                       handleStatusChange(
                         order._id,
@@ -503,8 +624,30 @@ function AdminOrders() {
 
                   {updatingOrder ===
                     order._id && (
-                    <span>Updating...</span>
+                    <span>
+                      Updating...
+                    </span>
                   )}
+
+                  {/* DOWNLOAD INVOICE */}
+                  <button
+                    type="button"
+                    className="admin-download-invoice"
+                    onClick={() =>
+                      handleDownloadInvoice(
+                        order._id
+                      )
+                    }
+                    disabled={
+                      downloadingInvoice ===
+                      order._id
+                    }
+                  >
+                    {downloadingInvoice ===
+                    order._id
+                      ? "DOWNLOADING..."
+                      : "DOWNLOAD INVOICE"}
+                  </button>
                 </div>
               </div>
             </div>
@@ -530,8 +673,12 @@ function AdminOrders() {
 
               <button
                 type="button"
-                onClick={closeShippingForm}
-                disabled={!!updatingOrder}
+                onClick={
+                  closeShippingForm
+                }
+                disabled={
+                  !!updatingOrder
+                }
               >
                 ×
               </button>
@@ -540,6 +687,7 @@ function AdminOrders() {
             <div className="admin-shipping-form">
               <label>
                 Courier Name
+
                 <input
                   type="text"
                   placeholder="e.g. Delhivery"
@@ -554,10 +702,13 @@ function AdminOrders() {
 
               <label>
                 Tracking Number
+
                 <input
                   type="text"
                   placeholder="Enter tracking number"
-                  value={trackingNumber}
+                  value={
+                    trackingNumber
+                  }
                   onChange={(e) =>
                     setTrackingNumber(
                       e.target.value
@@ -568,6 +719,7 @@ function AdminOrders() {
 
               <label>
                 Tracking URL
+
                 <span className="optional">
                   Optional
                 </span>
@@ -588,8 +740,12 @@ function AdminOrders() {
                 <button
                   type="button"
                   className="admin-shipping-cancel"
-                  onClick={closeShippingForm}
-                  disabled={!!updatingOrder}
+                  onClick={
+                    closeShippingForm
+                  }
+                  disabled={
+                    !!updatingOrder
+                  }
                 >
                   Cancel
                 </button>
@@ -600,7 +756,9 @@ function AdminOrders() {
                   onClick={
                     handleConfirmShipment
                   }
-                  disabled={!!updatingOrder}
+                  disabled={
+                    !!updatingOrder
+                  }
                 >
                   {updatingOrder
                     ? "Updating..."
