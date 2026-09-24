@@ -62,13 +62,15 @@ const generateInvoice = (order, res) => {
   );
 
   doc.text(
-    `Order Date: ${new Date(
+    `Order Date: ${
       order.createdAt
-    ).toLocaleDateString("en-IN")}`
+        ? new Date(order.createdAt).toLocaleDateString("en-IN")
+        : "N/A"
+    }`
   );
 
   doc.text(
-    `Order Status: ${order.orderStatus}`
+    `Order Status: ${order.orderStatus || "N/A"}`
   );
 
   doc.text(
@@ -80,7 +82,7 @@ const generateInvoice = (order, res) => {
   );
 
   doc.text(
-    `Payment Status: ${order.paymentStatus}`
+    `Payment Status: ${order.paymentStatus || "N/A"}`
   );
 
   doc.moveDown();
@@ -109,7 +111,9 @@ const generateInvoice = (order, res) => {
   );
 
   doc.text(
-    `Address: ${order.address}, ${order.city}, ${order.state} - ${order.pinCode}`
+    `Address: ${order.address || "N/A"}, ${
+      order.city || ""
+    }, ${order.state || ""} - ${order.pinCode || ""}`
   );
 
   doc.moveDown();
@@ -172,23 +176,25 @@ const generateInvoice = (order, res) => {
 
   doc.fontSize(10).font("Helvetica-Bold");
 
-  doc.text("Product", 50, doc.y, {
+  const tableY = doc.y;
+
+  doc.text("Product", 50, tableY, {
     width: 220,
   });
 
-  doc.text("Qty", 270, doc.y, {
+  doc.text("Qty", 270, tableY, {
     width: 50,
   });
 
-  doc.text("Price", 320, doc.y, {
+  doc.text("Price", 320, tableY, {
     width: 100,
   });
 
-  doc.text("Amount", 420, doc.y, {
+  doc.text("Amount", 420, tableY, {
     width: 100,
   });
 
-  doc.moveDown(0.5);
+  doc.moveDown(0.8);
 
   doc.font("Helvetica");
 
@@ -196,30 +202,33 @@ const generateInvoice = (order, res) => {
 
   order.items.forEach((item) => {
     const amount =
-      item.price * item.quantity;
+      Number(item.price || 0) *
+      Number(item.quantity || 0);
+
+    const itemY = doc.y;
 
     doc.text(
-      item.name,
+      item.name || "Product",
       50,
-      doc.y,
+      itemY,
       {
         width: 220,
       }
     );
 
     doc.text(
-      String(item.quantity),
+      String(item.quantity || 0),
       270,
-      doc.y,
+      itemY,
       {
         width: 50,
       }
     );
 
     doc.text(
-      `Rs. ${item.price.toFixed(2)}`,
+      `Rs. ${Number(item.price || 0).toFixed(2)}`,
       320,
-      doc.y,
+      itemY,
       {
         width: 100,
       }
@@ -228,13 +237,13 @@ const generateInvoice = (order, res) => {
     doc.text(
       `Rs. ${amount.toFixed(2)}`,
       420,
-      doc.y,
+      itemY,
       {
         width: 100,
       }
     );
 
-    doc.moveDown(0.5);
+    doc.moveDown(0.8);
   });
 
   doc.moveDown();
@@ -246,21 +255,27 @@ const generateInvoice = (order, res) => {
     .font("Helvetica");
 
   doc.text(
-    `Subtotal: Rs. ${order.subtotal.toFixed(2)}`,
+    `Subtotal: Rs. ${Number(
+      order.subtotal || 0
+    ).toFixed(2)}`,
     {
       align: "right",
     }
   );
 
   doc.text(
-    `Discount: - Rs. ${order.discountAmount.toFixed(2)}`,
+    `Discount: - Rs. ${Number(
+      order.discountAmount || 0
+    ).toFixed(2)}`,
     {
       align: "right",
     }
   );
 
   doc.text(
-    `Shipping: Rs. ${order.shippingAmount.toFixed(2)}`,
+    `Shipping: Rs. ${Number(
+      order.shippingAmount || 0
+    ).toFixed(2)}`,
     {
       align: "right",
     }
@@ -272,7 +287,9 @@ const generateInvoice = (order, res) => {
     .fontSize(13)
     .font("Helvetica-Bold")
     .text(
-      `Total: Rs. ${order.totalAmount.toFixed(2)}`,
+      `Total: Rs. ${Number(
+        order.totalAmount || 0
+      ).toFixed(2)}`,
       {
         align: "right",
       }
@@ -301,6 +318,50 @@ const generateInvoice = (order, res) => {
 
   doc.end();
 };
+
+
+/* =========================================================
+   ADMIN - DOWNLOAD ANY ORDER INVOICE
+   IMPORTANT: Keep this route BEFORE /:orderId
+========================================================= */
+
+router.get(
+  "/admin/:orderId",
+  adminAuth,
+  async (req, res) => {
+    try {
+      const order =
+        await Order.findById(
+          req.params.orderId
+        ).populate(
+          "customer",
+          "name email"
+        );
+
+      if (!order) {
+        return res.status(404).json({
+          success: false,
+          message: "Order not found.",
+        });
+      }
+
+      generateInvoice(order, res);
+    } catch (error) {
+      console.error(
+        "Admin invoice generation error:",
+        error
+      );
+
+      if (!res.headersSent) {
+        return res.status(500).json({
+          success: false,
+          message:
+            "Failed to generate invoice.",
+        });
+      }
+    }
+  }
+);
 
 
 /* =========================================================
@@ -343,49 +404,6 @@ router.get(
     } catch (error) {
       console.error(
         "Customer invoice generation error:",
-        error
-      );
-
-      if (!res.headersSent) {
-        return res.status(500).json({
-          success: false,
-          message:
-            "Failed to generate invoice.",
-        });
-      }
-    }
-  }
-);
-
-
-/* =========================================================
-   ADMIN - DOWNLOAD ANY ORDER INVOICE
-========================================================= */
-
-router.get(
-  "/admin/:orderId",
-  adminAuth,
-  async (req, res) => {
-    try {
-      const order =
-        await Order.findById(
-          req.params.orderId
-        ).populate(
-          "customer",
-          "name email"
-        );
-
-      if (!order) {
-        return res.status(404).json({
-          success: false,
-          message: "Order not found.",
-        });
-      }
-
-      generateInvoice(order, res);
-    } catch (error) {
-      console.error(
-        "Admin invoice generation error:",
         error
       );
 
