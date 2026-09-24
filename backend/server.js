@@ -14,6 +14,7 @@ const customerAuthRoutes = require("./routes/customerAuthRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const offerRoutes = require("./routes/offerRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
+const invoiceRoutes = require("./routes/invoiceRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -28,6 +29,7 @@ app.use("/api/customer-auth", customerAuthRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/offers", offerRoutes);
 app.use("/api/payment", paymentRoutes);
+app.use("/api/invoices", invoiceRoutes);
 
 app.get("/api/health", (req, res) => {
   res.json({
