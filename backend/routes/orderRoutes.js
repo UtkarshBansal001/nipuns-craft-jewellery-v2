@@ -7,6 +7,12 @@ const adminAuth = require("../middleware/authMiddleware");
 const customerAuth = require("../middleware/customerAuthMiddleware");
 const Razorpay = require("razorpay");
 
+const {
+  sendOrderPlacedEmail,
+  sendOrderConfirmedEmail,
+  sendOrderShippedEmail,
+} = require("../services/emailService");
+
 const router = express.Router();
 
 const razorpay = new Razorpay({
@@ -94,8 +100,6 @@ router.post("/", customerAuth, async (req, res) => {
       const razorpayPayment =
         await razorpay.payments.fetch(razorpayPaymentId);
 
-
-      // Make sure payment belongs to this customer
       if (
         razorpayOrder.notes?.customerId !==
         req.customer.id.toString()
@@ -109,8 +113,6 @@ router.post("/", customerAuth, async (req, res) => {
         });
       }
 
-
-      // Verify payment
       if (
         razorpayPayment.order_id !== razorpayOrder.id ||
         razorpayPayment.status !== "captured" ||
@@ -162,7 +164,6 @@ router.post("/", customerAuth, async (req, res) => {
       _id: { $in: productIds },
     }).session(session);
 
-
     if (products.length !== items.length) {
       await session.abortTransaction();
       session.endSession();
@@ -173,14 +174,12 @@ router.post("/", customerAuth, async (req, res) => {
       });
     }
 
-
     const productMap = new Map(
       products.map((product) => [
         product._id.toString(),
         product,
       ])
     );
-
 
     let subtotal = 0;
 
@@ -194,11 +193,9 @@ router.post("/", customerAuth, async (req, res) => {
         item.product.toString()
       );
 
-
       if (!product) {
         throw new Error("Product not found.");
       }
-
 
       if (
         !Number.isInteger(item.quantity) ||
@@ -207,13 +204,11 @@ router.post("/", customerAuth, async (req, res) => {
         throw new Error("Invalid product quantity.");
       }
 
-
       if (item.quantity > product.stock) {
         throw new Error(
           `${product.name} has only ${product.stock} item(s) in stock.`
         );
       }
-
 
       const price =
         product.salePrice !== null &&
@@ -221,9 +216,7 @@ router.post("/", customerAuth, async (req, res) => {
           ? product.salePrice
           : product.price;
 
-
       subtotal += price * item.quantity;
-
 
       return {
         product: product._id,
@@ -251,13 +244,11 @@ router.post("/", customerAuth, async (req, res) => {
     let discountAmount = 0;
     let validCouponCode = "";
 
-
     if (couponCode && couponCode.trim()) {
       const offer = await Offer.findOne({
         code: couponCode.toUpperCase().trim(),
         isActive: true,
       }).session(session);
-
 
       if (!offer) {
         await session.abortTransaction();
@@ -269,9 +260,7 @@ router.post("/", customerAuth, async (req, res) => {
         });
       }
 
-
       const now = new Date();
-
 
       if (
         now < offer.startDate ||
@@ -287,7 +276,6 @@ router.post("/", customerAuth, async (req, res) => {
         });
       }
 
-
       if (
         subtotal < offer.minimumOrderValue
       ) {
@@ -301,11 +289,9 @@ router.post("/", customerAuth, async (req, res) => {
         });
       }
 
-
       if (offer.discountType === "percentage") {
         discountAmount =
           (subtotal * offer.discountValue) / 100;
-
 
         if (
           offer.maxDiscount > 0 &&
@@ -317,11 +303,9 @@ router.post("/", customerAuth, async (req, res) => {
         discountAmount = offer.discountValue;
       }
 
-
       if (discountAmount > subtotal) {
         discountAmount = subtotal;
       }
-
 
       validCouponCode = offer.code;
     }
@@ -344,7 +328,6 @@ router.post("/", customerAuth, async (req, res) => {
     if (paymentMethod === "online") {
       const razorpayOrder =
         await razorpay.orders.fetch(razorpayOrderId);
-
 
       if (
         razorpayOrder.currency !== "INR" ||
@@ -404,7 +387,6 @@ router.post("/", customerAuth, async (req, res) => {
 
           totalAmount,
 
-          // Shipping & Tracking defaults
           courierName: "",
           trackingNumber: "",
           trackingUrl: "",
@@ -414,7 +396,6 @@ router.post("/", customerAuth, async (req, res) => {
       ],
       { session }
     );
-
 
     const createdOrder = createdOrders[0];
 
@@ -441,7 +422,6 @@ router.post("/", customerAuth, async (req, res) => {
           }
         );
 
-
       if (!updatedProduct) {
         throw new Error(
           `${item.name} is out of stock or insufficient stock.`
@@ -457,6 +437,53 @@ router.post("/", customerAuth, async (req, res) => {
     await session.commitTransaction();
     session.endSession();
 
+    console.log(
+      "ORDER COMMITTED - EMAIL SECTION REACHED"
+    );
+
+
+    // ==================================================
+    // SEND ORDER PLACED EMAIL
+    // ==================================================
+
+    try {
+      const customer = await mongoose
+        .model("Customer")
+        .findById(req.customer.id)
+        .select("name email");
+
+      console.log(
+        "CUSTOMER FOR EMAIL:",
+        customer
+      );
+
+      if (customer?.email) {
+        await sendOrderPlacedEmail({
+          customerEmail: customer.email,
+          customerName:
+            customer.name || "Customer",
+          order: createdOrder,
+        });
+
+        console.log(
+          `Order placed email sent to ${customer.email}`
+        );
+      } else {
+        console.warn(
+          "Customer email not found. Order email not sent."
+        );
+      }
+    } catch (emailError) {
+      console.error(
+        "Order email failed:",
+        emailError.message
+      );
+    }
+
+
+    // ==================================================
+    // RESPONSE
+    // ==================================================
 
     res.status(201).json({
       success: true,
@@ -465,8 +492,10 @@ router.post("/", customerAuth, async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Create order error:", error);
-
+    console.error(
+      "Create order error:",
+      error
+    );
 
     try {
       await session.abortTransaction();
@@ -477,9 +506,7 @@ router.post("/", customerAuth, async (req, res) => {
       );
     }
 
-
     session.endSession();
-
 
     const isClientError =
       error.message === "Product not found." ||
@@ -487,7 +514,6 @@ router.post("/", customerAuth, async (req, res) => {
       error.message.includes("has only") ||
       error.message.includes("out of stock") ||
       error.message.includes("insufficient stock");
-
 
     res.status(isClientError ? 400 : 500).json({
       success: false,
@@ -510,7 +536,6 @@ router.get(
     try {
       const { customerId } = req.params;
 
-
       if (req.customer.id !== customerId) {
         return res.status(403).json({
           success: false,
@@ -519,7 +544,6 @@ router.get(
         });
       }
 
-
       if (!mongoose.Types.ObjectId.isValid(customerId)) {
         return res.status(400).json({
           success: false,
@@ -527,11 +551,9 @@ router.get(
         });
       }
 
-
       const orders = await Order.find({
         customer: customerId,
       }).sort({ createdAt: -1 });
-
 
       res.json({
         success: true,
@@ -543,7 +565,6 @@ router.get(
         "Fetch customer orders error:",
         error
       );
-
 
       res.status(500).json({
         success: false,
@@ -567,9 +588,7 @@ router.put(
     try {
       session.startTransaction();
 
-
       const { orderId } = req.params;
-
 
       const {
         orderStatus,
@@ -577,7 +596,6 @@ router.put(
         trackingNumber,
         trackingUrl,
       } = req.body;
-
 
       const allowedStatuses = [
         "Pending",
@@ -588,7 +606,10 @@ router.put(
       ];
 
 
-      // Validate order ID
+      // ==================================================
+      // VALIDATE ORDER ID
+      // ==================================================
+
       if (!mongoose.Types.ObjectId.isValid(orderId)) {
         await session.abortTransaction();
         session.endSession();
@@ -600,7 +621,10 @@ router.put(
       }
 
 
-      // Validate status
+      // ==================================================
+      // VALIDATE STATUS
+      // ==================================================
+
       if (!allowedStatuses.includes(orderStatus)) {
         await session.abortTransaction();
         session.endSession();
@@ -612,10 +636,12 @@ router.put(
       }
 
 
-      // Find order
+      // ==================================================
+      // FIND ORDER
+      // ==================================================
+
       const order =
         await Order.findById(orderId).session(session);
-
 
       if (!order) {
         await session.abortTransaction();
@@ -626,6 +652,11 @@ router.put(
           message: "Order not found.",
         });
       }
+
+
+      // Save previous status before changing it.
+      const previousOrderStatus =
+        order.orderStatus;
 
 
       // ==================================================
@@ -724,7 +755,6 @@ router.put(
           order.trackingUrl;
 
 
-        // Courier required
         if (!finalCourierName) {
           await session.abortTransaction();
           session.endSession();
@@ -737,7 +767,6 @@ router.put(
         }
 
 
-        // Tracking number required
         if (!finalTrackingNumber) {
           await session.abortTransaction();
           session.endSession();
@@ -760,7 +789,6 @@ router.put(
           finalTrackingUrl;
 
 
-        // Set shipping date only once
         if (!order.shippedAt) {
           order.shippedAt = new Date();
         }
@@ -809,7 +837,6 @@ router.put(
 
       order.orderStatus = orderStatus;
 
-
       await order.save({
         session,
       });
@@ -822,6 +849,105 @@ router.put(
       await session.commitTransaction();
       session.endSession();
 
+
+      console.log(
+        `Order ${order.invoiceNumber}: ${previousOrderStatus} -> ${orderStatus}`
+      );
+
+
+      // ==================================================
+      // SEND ORDER CONFIRMED EMAIL
+      // ONLY Pending -> Confirmed
+      // ==================================================
+
+      if (
+        previousOrderStatus === "Pending" &&
+        orderStatus === "Confirmed"
+      ) {
+        try {
+          const customer = await mongoose
+            .model("Customer")
+            .findById(order.customer)
+            .select("name email");
+
+          console.log(
+            "CUSTOMER FOR CONFIRMED EMAIL:",
+            customer
+          );
+
+          if (customer?.email) {
+            await sendOrderConfirmedEmail({
+              customerEmail: customer.email,
+              customerName:
+                customer.name || "Customer",
+              order,
+            });
+
+            console.log(
+              `Order confirmed email sent to ${customer.email}`
+            );
+          } else {
+            console.warn(
+              "Customer email not found. Confirmed email not sent."
+            );
+          }
+        } catch (emailError) {
+          console.error(
+            "Confirmed order email failed:",
+            emailError.message
+          );
+        }
+      }
+
+
+      // ==================================================
+      // SEND ORDER SHIPPED EMAIL
+      // ONLY Confirmed -> Shipped
+      // ==================================================
+
+      if (
+        previousOrderStatus === "Confirmed" &&
+        orderStatus === "Shipped"
+      ) {
+        try {
+          const customer = await mongoose
+            .model("Customer")
+            .findById(order.customer)
+            .select("name email");
+
+          console.log(
+            "CUSTOMER FOR SHIPPED EMAIL:",
+            customer
+          );
+
+          if (customer?.email) {
+            await sendOrderShippedEmail({
+              customerEmail: customer.email,
+              customerName:
+                customer.name || "Customer",
+              order,
+            });
+
+            console.log(
+              `Order shipped email sent successfully to ${customer.email}`
+            );
+          } else {
+            console.warn(
+              "Customer email not found. Shipped email not sent."
+            );
+          }
+        } catch (emailError) {
+          console.error(
+            "Shipped order email failed:",
+            emailError.message
+          );
+        }
+      }
+
+
+      // ==================================================
+      // RESPONSE
+      // ==================================================
 
       res.json({
         success: true,
@@ -836,7 +962,6 @@ router.put(
         error
       );
 
-
       try {
         await session.abortTransaction();
       } catch (transactionError) {
@@ -846,9 +971,7 @@ router.put(
         );
       }
 
-
       session.endSession();
-
 
       res.status(500).json({
         success: false,
@@ -879,7 +1002,6 @@ router.get(
           createdAt: -1,
         });
 
-
       res.json({
         success: true,
         orders,
@@ -890,7 +1012,6 @@ router.get(
         "Fetch all orders error:",
         error
       );
-
 
       res.status(500).json({
         success: false,

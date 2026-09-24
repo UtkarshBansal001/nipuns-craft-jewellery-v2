@@ -20,11 +20,28 @@ const customerSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+
     phone: {
-  type: String,
-  default: "",
-  trim: true,
-},
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    // Email OTP verification
+    emailVerified: {
+      type: Boolean,
+      default: false,
+    },
+
+    emailOtpHash: {
+      type: String,
+      default: null,
+    },
+
+    emailOtpExpires: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,
