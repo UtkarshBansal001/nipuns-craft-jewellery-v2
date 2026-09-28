@@ -406,6 +406,13 @@ Authorization: `Bearer ${localStorage.getItem( "customerToken" )}`,
     description: "Jewellery Order",
     order_id: order.id,
 
+    method: {
+  upi: true,
+  card: true,
+  netbanking: true,
+  wallet: true,
+},
+
     handler: async function (
       paymentResponse
     ) {
