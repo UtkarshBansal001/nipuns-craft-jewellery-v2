@@ -35,6 +35,10 @@ function AdminProducts() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
 
+  // Category filter
+  const [selectedCategory, setSelectedCategory] =
+    useState("All");
+
   // Existing images already saved in database
   const [existingImages, setExistingImages] = useState([]);
 
@@ -83,6 +87,31 @@ function AdminProducts() {
       setLoading(false);
     }
   };
+
+  /* =========================================================
+     CATEGORY LIST
+  ========================================================= */
+
+  const categories = [
+    "All",
+    ...new Set(
+      products
+        .map((product) => product.category)
+        .filter(Boolean)
+    ),
+  ];
+
+  /* =========================================================
+     FILTERED PRODUCTS
+  ========================================================= */
+
+  const filteredProducts =
+    selectedCategory === "All"
+      ? products
+      : products.filter(
+          (product) =>
+            product.category === selectedCategory
+        );
 
   /* =========================================================
      SCROLL TO FORM
@@ -162,10 +191,6 @@ function AdminProducts() {
       return;
     }
 
-    /*
-      Existing images + new images should not exceed 10
-    */
-
     const totalImages =
       existingImages.length + files.length;
 
@@ -213,15 +238,6 @@ function AdminProducts() {
   ========================================================= */
 
   const openEditForm = (product) => {
-     alert("EDIT BUTTON WORKING");
-    console.log("EDIT BUTTON CLICKED", product);
-
-    
-
-    /*
-      Convert DB images into normal URLs
-    */
-
     const images = Array.isArray(
       product.images
     )
@@ -232,29 +248,12 @@ function AdminProducts() {
           .filter(Boolean)
       : [];
 
-    console.log(
-      "EXISTING IMAGES:",
-      images
-    );
-
     setEditingId(product._id);
-
-    /*
-      Existing images remain separate
-    */
 
     setExistingImages(images);
 
-    /*
-      New images reset
-    */
-
     setSelectedImages([]);
     setNewImagePreviews([]);
-
-    /*
-      Fill product form
-    */
 
     setFormData({
       name: product.name || "",
@@ -277,11 +276,6 @@ function AdminProducts() {
       stock:
         product.stock ?? "",
 
-      /*
-        Existing image URLs are also stored here.
-        This helps preserve them during update.
-      */
-
       images: images.join("\n"),
 
       isFeatured:
@@ -295,11 +289,6 @@ function AdminProducts() {
     });
 
     setMessage("");
-
-    /*
-      Opening form triggers scroll
-    */
-
     setShowForm(true);
   };
 
@@ -315,10 +304,6 @@ function AdminProducts() {
       );
 
     setExistingImages(updatedImages);
-
-    /*
-      Update textarea-style stored URLs too
-    */
 
     setFormData((previous) => ({
       ...previous,
@@ -442,10 +427,6 @@ function AdminProducts() {
           uploadResponse.data
             .images || [];
 
-        /*
-          Old images + new uploaded images
-        */
-
         finalImages = [
           ...finalImages,
           ...newImages,
@@ -500,11 +481,6 @@ function AdminProducts() {
           formData.isBestSeller,
       };
 
-      console.log(
-        "FINAL PRODUCT DATA:",
-        productData
-      );
-
       /* =====================================================
          UPDATE
       ===================================================== */
@@ -546,10 +522,6 @@ function AdminProducts() {
           "Product added successfully."
         );
       }
-
-      /* =====================================================
-         RESET
-      ===================================================== */
 
       setShowForm(false);
       setEditingId(null);
@@ -640,57 +612,64 @@ function AdminProducts() {
     setExistingImages([]);
     setSelectedImages([]);
     setNewImagePreviews([]);
+    setMessage("");
   };
 
   /* =========================================================
-     JSX
+     LOADING
+  ========================================================= */
+
+  if (loading) {
+    return (
+      <div className="admin-products">
+        <div className="admin-products-header">
+          <h1>Products</h1>
+        </div>
+
+        <div className="loading-products">
+          Loading products...
+        </div>
+      </div>
+    );
+  }
+
+  /* =========================================================
+     PAGE
   ========================================================= */
 
   return (
-    <div className="products-page">
+    <div className="admin-products">
 
       {/* =====================================================
           HEADER
       ===================================================== */}
 
-      <header className="products-header">
+      <div className="admin-products-header">
 
         <div>
-
-          <button
-            className="back-button"
-            onClick={() =>
-              navigate("/admin")
-            }
-          >
-            ← Dashboard
-          </button>
+          <h1>Products</h1>
 
           <p>
-            STORE MANAGEMENT
+            Manage your jewellery products
           </p>
-
-          <h1>
-            Products
-          </h1>
-
         </div>
 
         <button
+          type="button"
           className="add-product-button"
           onClick={openAddForm}
         >
           + Add Product
         </button>
 
-      </header>
+      </div>
 
       {/* =====================================================
           MESSAGE
       ===================================================== */}
 
       {message && (
-        <div className="product-message">
+        <div className="admin-message">
           {message}
         </div>
       )}
@@ -700,35 +679,22 @@ function AdminProducts() {
       ===================================================== */}
 
       {showForm && (
-
-        <section
+        <div
+          className="product-form-container"
           ref={productFormRef}
-          className="product-form-card"
         >
 
-          {/* FORM HEADER */}
+          <div className="product-form-header">
 
-          <div className="form-header">
-
-            <div>
-
-              <p>
-                {editingId
-                  ? "EDIT PRODUCT"
-                  : "NEW PRODUCT"}
-              </p>
-
-              <h2>
-                {editingId
-                  ? "Edit Product"
-                  : "Add New Product"}
-              </h2>
-
-            </div>
+            <h2>
+              {editingId
+                ? "Edit Product"
+                : "Add New Product"}
+            </h2>
 
             <button
               type="button"
-              className="close-form"
+              className="close-form-button"
               onClick={closeForm}
             >
               ×
@@ -736,447 +702,307 @@ function AdminProducts() {
 
           </div>
 
-          {/* FORM */}
-
-          <form onSubmit={handleSubmit}>
-
-            <div className="form-grid">
-
-              {/* PRODUCT NAME */}
-
-              <div className="input-group">
-
-                <label>
-                  Product Name *
-                </label>
-
-                <input
-                  name="name"
-                  value={
-                    formData.name
-                  }
-                  onChange={
-                    handleChange
-                  }
-                  placeholder="e.g. Pearl Drop Earrings"
-                />
-
-              </div>
-
-              {/* PRODUCT CODE */}
-
-              <div className="input-group">
-
-                <label>
-                  Product Code *
-                </label>
-
-                <input
-                  name="productCode"
-                  value={
-                    formData.productCode
-                  }
-                  onChange={
-                    handleChange
-                  }
-                  placeholder="NCJ001"
-                />
-
-              </div>
-
-              {/* DESCRIPTION */}
-
-              <div className="input-group full">
-
-                <label>
-                  Description
-                </label>
-
-                <textarea
-                  name="description"
-                  value={
-                    formData.description
-                  }
-                  onChange={
-                    handleChange
-                  }
-                  placeholder="Describe your jewellery product..."
-                  rows="4"
-                />
-
-              </div>
-
-              {/* ORIGINAL PRICE */}
-
-              <div className="input-group">
-
-                <label>
-                  Original Price (₹) *
-                </label>
-
-                <input
-                  type="number"
-                  name="price"
-                  min="0"
-                  value={
-                    formData.price
-                  }
-                  onChange={
-                    handleChange
-                  }
-                  placeholder="999"
-                />
-
-              </div>
-
-              {/* SALE PRICE */}
-
-              <div className="input-group">
-
-                <label>
-                  Sale Price (₹)
-                </label>
-
-                <input
-                  type="number"
-                  name="salePrice"
-                  min="0"
-                  value={
-                    formData.salePrice
-                  }
-                  onChange={
-                    handleChange
-                  }
-                  placeholder="799"
-                />
-
-              </div>
-
-              {/* CATEGORY */}
-
-              <div className="input-group">
-
-                <label>
-                  Category *
-                </label>
-
-                <input
-                  name="category"
-                  value={
-                    formData.category
-                  }
-                  onChange={
-                    handleChange
-                  }
-                  placeholder="Earrings"
-                />
-
-              </div>
-
-              {/* STOCK */}
-
-              <div className="input-group">
-
-                <label>
-                  Stock
-                </label>
-
-                <input
-                  type="number"
-                  name="stock"
-                  min="0"
-                  value={
-                    formData.stock
-                  }
-                  onChange={
-                    handleChange
-                  }
-                  placeholder="10"
-                />
-
-              </div>
-
-              {/* =================================================
-                  IMAGES
-              ================================================= */}
-
-              <div className="input-group full">
-
-                <label>
-                  Product Images
-                </label>
-
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={
-                    handleImageChange
-                  }
-                />
-
-                <small>
-                  Maximum 10 images.
-                </small>
-
-                {/* =================================================
-                    EXISTING IMAGES
-                ================================================= */}
-
-                {existingImages.length >
-                  0 && (
-
-                  <div>
-
-                    <p
-                      style={{
-                        margin:
-                          "15px 0 8px",
-                        fontWeight:
-                          "600",
-                      }}
-                    >
-                      Existing Images
-                    </p>
-
-                    <div className="image-preview-grid">
-
-                      {existingImages.map(
-                        (
-                          src,
-                          index
-                        ) => (
-
-                          <div
-                            className="image-preview"
-                            key={`existing-${index}`}
-                            style={{
-                              position:
-                                "relative",
-                            }}
-                          >
-
-                            <img
-                              src={src}
-                              alt={`Existing ${
-                                index +
-                                1
-                              }`}
-                              onError={(
-                                e
-                              ) => {
-                                console.error(
-                                  "Existing image failed:",
-                                  src
-                                );
-
-                                e.currentTarget.style.display =
-                                  "none";
-                              }}
-                            />
-
-                            <button
-                              type="button"
-                              onClick={() =>
-                                removeExistingImage(
-                                  index
-                                )
-                              }
-                              style={{
-                                position:
-                                  "absolute",
-                                top:
-                                  "5px",
-                                right:
-                                  "5px",
-                                width:
-                                  "26px",
-                                height:
-                                  "26px",
-                                border:
-                                  "none",
-                                borderRadius:
-                                  "50%",
-                                cursor:
-                                  "pointer",
-                                fontSize:
-                                  "16px",
-                              }}
-                            >
-                              ×
-                            </button>
-
-                          </div>
-
-                        )
-                      )}
-
-                    </div>
-
-                  </div>
-
-                )}
-
-                {/* =================================================
-                    NEW IMAGE PREVIEWS
-                ================================================= */}
-
-                {newImagePreviews.length >
-                  0 && (
-
-                  <div>
-
-                    <p
-                      style={{
-                        margin:
-                          "15px 0 8px",
-                        fontWeight:
-                          "600",
-                      }}
-                    >
-                      New Images
-                    </p>
-
-                    <div className="image-preview-grid">
-
-                      {newImagePreviews.map(
-                        (
-                          src,
-                          index
-                        ) => (
-
-                          <div
-                            className="image-preview"
-                            key={`new-${index}`}
-                            style={{
-                              position:
-                                "relative",
-                            }}
-                          >
-
-                            <img
-                              src={src}
-                              alt={`New ${
-                                index +
-                                1
-                              }`}
-                            />
-
-                            <button
-                              type="button"
-                              onClick={() =>
-                                removeNewImage(
-                                  index
-                                )
-                              }
-                              style={{
-                                position:
-                                  "absolute",
-                                top:
-                                  "5px",
-                                right:
-                                  "5px",
-                                width:
-                                  "26px",
-                                height:
-                                  "26px",
-                                border:
-                                  "none",
-                                borderRadius:
-                                  "50%",
-                                cursor:
-                                  "pointer",
-                                fontSize:
-                                  "16px",
-                              }}
-                            >
-                              ×
-                            </button>
-
-                          </div>
-
-                        )
-                      )}
-
-                    </div>
-
-                  </div>
-
-                )}
-
-              </div>
+          <form
+            onSubmit={handleSubmit}
+            className="product-form"
+          >
+
+            {/* Product Name */}
+
+            <div className="form-group">
+
+              <label>
+                Product Name *
+              </label>
+
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="Enter product name"
+              />
 
             </div>
 
-            {/* =================================================
-                PRODUCT OPTIONS
-            ================================================= */}
+            {/* Product Code */}
 
-            <div className="product-options">
+            <div className="form-group">
 
               <label>
+                Product Code *
+              </label>
 
+              <input
+                type="text"
+                name="productCode"
+                value={
+                  formData.productCode
+                }
+                onChange={handleChange}
+                placeholder="Example: BR01"
+              />
+
+            </div>
+
+            {/* Category */}
+
+            <div className="form-group">
+
+              <label>
+                Category *
+              </label>
+
+              <input
+                type="text"
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                placeholder="Example: Bracelet"
+              />
+
+            </div>
+
+            {/* Description */}
+
+            <div className="form-group full-width">
+
+              <label>
+                Description
+              </label>
+
+              <textarea
+                name="description"
+                value={
+                  formData.description
+                }
+                onChange={handleChange}
+                placeholder="Enter product description"
+                rows="4"
+              />
+
+            </div>
+
+            {/* Price */}
+
+            <div className="form-group">
+
+              <label>
+                Price *
+              </label>
+
+              <input
+                type="number"
+                name="price"
+                value={formData.price}
+                onChange={handleChange}
+                min="0"
+                placeholder="Enter price"
+              />
+
+            </div>
+
+            {/* Sale Price */}
+
+            <div className="form-group">
+
+              <label>
+                Sale Price
+              </label>
+
+              <input
+                type="number"
+                name="salePrice"
+                value={
+                  formData.salePrice
+                }
+                onChange={handleChange}
+                min="0"
+                placeholder="Optional"
+              />
+
+            </div>
+
+            {/* Stock */}
+
+            <div className="form-group">
+
+              <label>
+                Stock
+              </label>
+
+              <input
+                type="number"
+                name="stock"
+                value={formData.stock}
+                onChange={handleChange}
+                min="0"
+                placeholder="Enter stock"
+              />
+
+            </div>
+
+            {/* Images */}
+
+            <div className="form-group full-width">
+
+              <label>
+                Product Images
+              </label>
+
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleImageChange}
+              />
+
+              <small>
+                Maximum 10 images per product.
+              </small>
+
+            </div>
+
+            {/* Existing Images */}
+
+            {existingImages.length > 0 && (
+              <div className="image-preview-section full-width">
+
+                <h3>
+                  Existing Images
+                </h3>
+
+                <div className="image-preview-grid">
+
+                  {existingImages.map(
+                    (image, index) => (
+                      <div
+                        className="image-preview-item"
+                        key={`${image}-${index}`}
+                      >
+
+                        <img
+                          src={image}
+                          alt={`Product ${index + 1}`}
+                        />
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            removeExistingImage(
+                              index
+                            )
+                          }
+                        >
+                          ×
+                        </button>
+
+                      </div>
+                    )
+                  )}
+
+                </div>
+
+              </div>
+            )}
+
+            {/* New Images */}
+
+            {newImagePreviews.length > 0 && (
+              <div className="image-preview-section full-width">
+
+                <h3>
+                  New Images
+                </h3>
+
+                <div className="image-preview-grid">
+
+                  {newImagePreviews.map(
+                    (image, index) => (
+                      <div
+                        className="image-preview-item"
+                        key={`${image}-${index}`}
+                      >
+
+                        <img
+                          src={image}
+                          alt={`New product ${index + 1}`}
+                        />
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            removeNewImage(
+                              index
+                            )
+                          }
+                        >
+                          ×
+                        </button>
+
+                      </div>
+                    )
+                  )}
+
+                </div>
+
+              </div>
+            )}
+
+            {/* Checkboxes */}
+
+            <div className="checkbox-group full-width">
+
+              <label>
                 <input
                   type="checkbox"
                   name="isFeatured"
                   checked={
                     formData.isFeatured
                   }
-                  onChange={
-                    handleChange
-                  }
+                  onChange={handleChange}
                 />
 
                 Featured Product
-
               </label>
 
               <label>
-
                 <input
                   type="checkbox"
                   name="isNewArrival"
                   checked={
                     formData.isNewArrival
                   }
-                  onChange={
-                    handleChange
-                  }
+                  onChange={handleChange}
                 />
 
                 New Arrival
-
               </label>
 
               <label>
-
                 <input
                   type="checkbox"
                   name="isBestSeller"
                   checked={
                     formData.isBestSeller
                   }
-                  onChange={
-                    handleChange
-                  }
+                  onChange={handleChange}
                 />
 
                 Best Seller
-
               </label>
 
             </div>
 
-            {/* =================================================
-                ACTIONS
-            ================================================= */}
+            {/* Form Buttons */}
 
-            <div className="form-actions">
+            <div className="form-buttons full-width">
 
               <button
                 type="button"
                 className="cancel-button"
                 onClick={closeForm}
+                disabled={saving}
               >
                 Cancel
               </button>
@@ -1190,88 +1016,120 @@ function AdminProducts() {
                   ? "Saving..."
                   : editingId
                   ? "Update Product"
-                  : "Save Product"}
+                  : "Add Product"}
               </button>
 
             </div>
 
           </form>
 
-        </section>
-
+        </div>
       )}
 
       {/* =====================================================
-          PRODUCTS LIST
+          PRODUCT LIST
       ===================================================== */}
 
-      <section className="products-list-card">
+      <div className="products-list-section">
 
-        <div className="list-heading">
+        <div className="products-list-header">
 
           <div>
 
-            <p>
-              CATALOG
-            </p>
-
             <h2>
-
-              All Products
-
-              <span>
-                {products.length}
-              </span>
-
+              {selectedCategory === "All"
+                ? "All Products"
+                : `${selectedCategory} Products`}
             </h2>
+
+            <span className="product-count">
+              {filteredProducts.length} product
+              {filteredProducts.length !== 1
+                ? "s"
+                : ""}
+            </span>
+
+          </div>
+
+          {/* CATEGORY FILTER */}
+
+          <div className="category-filter">
+
+            <label htmlFor="category-filter">
+              Category:
+            </label>
+
+            <select
+              id="category-filter"
+              value={selectedCategory}
+              onChange={(e) =>
+                setSelectedCategory(
+                  e.target.value
+                )
+              }
+            >
+
+              {categories.map(
+                (category) => (
+                  <option
+                    key={category}
+                    value={category}
+                  >
+                    {category}
+                  </option>
+                )
+              )}
+
+            </select>
 
           </div>
 
         </div>
 
-        {/* LOADING */}
+        {/* =================================================
+            NO PRODUCTS
+        ================================================= */}
 
-        {loading ? (
-
+        {products.length === 0 ? (
           <div className="empty-products">
-            Loading products...
-          </div>
-
-        ) : products.length === 0 ? (
-
-          /* =================================================
-             EMPTY
-          ================================================= */
-
-          <div className="empty-products">
-
-            <div className="empty-icon">
-              ◇
-            </div>
 
             <h3>
               No products yet
             </h3>
 
             <p>
-              Add your first jewellery
-              product to start building
-              your catalogue.
+              Add your first product to
+              get started.
             </p>
 
             <button
+              type="button"
+              className="add-product-button"
               onClick={openAddForm}
-              className="empty-add-button"
             >
-              + Add First Product
+              + Add Product
             </button>
+
+          </div>
+        ) : filteredProducts.length === 0 ? (
+
+          <div className="empty-products">
+
+            <h3>
+              No products in this category
+            </h3>
+
+            <p>
+              Try selecting another
+              category.
+            </p>
 
           </div>
 
         ) : (
 
           /* =================================================
-             TABLE
+             PRODUCT TABLE
           ================================================= */
 
           <div className="products-table-wrapper">
@@ -1281,6 +1139,10 @@ function AdminProducts() {
               <thead>
 
                 <tr>
+
+                  <th>
+                    Image
+                  </th>
 
                   <th>
                     Product
@@ -1303,6 +1165,10 @@ function AdminProducts() {
                   </th>
 
                   <th>
+                    Status
+                  </th>
+
+                  <th>
                     Actions
                   </th>
 
@@ -1312,168 +1178,168 @@ function AdminProducts() {
 
               <tbody>
 
-                {products.map(
+                {filteredProducts.map(
                   (product) => {
 
-                    const displayPrice =
-                      product.salePrice ??
-                      product.price;
+                    const firstImage =
+                      Array.isArray(
+                        product.images
+                      ) &&
+                      product.images.length > 0
+                        ? getImageUrl(
+                            product.images[0]
+                          )
+                        : null;
 
                     return (
-
                       <tr
-                        key={
-                          product._id
-                        }
+                        key={product._id}
                       >
 
-                        {/* PRODUCT */}
+                        {/* Image */}
 
                         <td>
 
-                          <div className="product-name-cell">
+                          <div className="product-table-image">
 
-                            <div className="product-thumbnail">
-
-                              {product
-                                .images
-                                ?.length >
-                              0 ? (
-
-                                <img
-                                  src={getImageUrl(
-                                    product
-                                      .images[0]
-                                  )}
-                                  alt={
-                                    product.name
-                                  }
-                                />
-
-                              ) : (
-
-                                <span>
-                                  ◇
-                                </span>
-
-                              )}
-
-                            </div>
-
-                            <div>
-
-                              <strong>
-                                {
+                            {firstImage ? (
+                              <img
+                                src={firstImage}
+                                alt={
                                   product.name
                                 }
-                              </strong>
-
-                              <small>
-
-                                {product.isBestSeller
-                                  ? "Best Seller"
-                                  : product.isNewArrival
-                                  ? "New Arrival"
-                                  : ""}
-
-                              </small>
-
-                            </div>
-
-                          </div>
-
-                        </td>
-
-                        {/* CODE */}
-
-                        <td>
-
-                          <span className="product-code">
-
-                            {
-                              product.productCode
-                            }
-
-                          </span>
-
-                        </td>
-
-                        {/* CATEGORY */}
-
-                        <td>
-                          {
-                            product.category
-                          }
-                        </td>
-
-                        {/* PRICE */}
-
-                        <td>
-
-                          <div className="price-cell">
-
-                            {product.salePrice ? (
-
-                              <>
-
-                                <strong>
-                                  ₹
-                                  {
-                                    displayPrice
-                                  }
-                                </strong>
-
-                                <del>
-                                  ₹
-                                  {
-                                    product.price
-                                  }
-                                </del>
-
-                              </>
-
+                              />
                             ) : (
-
-                              <strong>
-                                ₹
-                                {
-                                  product.price
-                                }
-                              </strong>
-
+                              <div className="no-image">
+                                No Image
+                              </div>
                             )}
 
                           </div>
 
                         </td>
 
-                        {/* STOCK */}
+                        {/* Product */}
+
+                        <td>
+
+                          <div className="product-table-name">
+
+                            <strong>
+                              {product.name}
+                            </strong>
+
+                            {product.isFeatured && (
+                              <span className="product-badge">
+                                Featured
+                              </span>
+                            )}
+
+                          </div>
+
+                        </td>
+
+                        {/* Product Code */}
+
+                        <td>
+                          {product.productCode ||
+                            "-"}
+                        </td>
+
+                        {/* Category */}
+
+                        <td>
+                          {product.category ||
+                            "-"}
+                        </td>
+
+                        {/* Price */}
+
+                        <td>
+
+                          {product.salePrice !==
+                            null &&
+                          product.salePrice !==
+                            undefined &&
+                          product.salePrice !==
+                            "" ? (
+                            <div>
+
+                              <span className="sale-price">
+                                ₹
+                                {
+                                  product.salePrice
+                                }
+                              </span>
+
+                              <span className="original-price">
+                                ₹
+                                {
+                                  product.price
+                                }
+                              </span>
+
+                            </div>
+                          ) : (
+                            <span>
+                              ₹
+                              {
+                                product.price
+                              }
+                            </span>
+                          )}
+
+                        </td>
+
+                        {/* Stock */}
 
                         <td>
 
                           <span
                             className={
-                              product.stock ===
-                              0
-                                ? "stock out"
-                                : product.stock <=
-                                  5
-                                ? "stock low"
-                                : "stock"
+                              Number(
+                                product.stock
+                              ) > 0
+                                ? "stock-in"
+                                : "stock-out"
                             }
                           >
-                            {
+                            {Number(
                               product.stock
-                            }
+                            ) > 0
+                              ? product.stock
+                              : "Out of Stock"}
                           </span>
 
                         </td>
 
-                        {/* ACTIONS */}
+                        {/* Status */}
 
                         <td>
 
-                          <div className="table-actions">
+                          <div className="product-status">
+
+                            {product.isNewArrival && (
+                              <span>
+                                New
+                              </span>
+                            )}
+
+                            {product.isBestSeller && (
+                              <span>
+                                Best Seller
+                              </span>
+                            )}
+
+                          </div>
+
+                        </td>
+
+                        {/* Actions */}
+
+                        <td>
+
+                          <div className="product-actions">
 
                             <button
                               type="button"
@@ -1504,7 +1370,6 @@ function AdminProducts() {
                         </td>
 
                       </tr>
-
                     );
                   }
                 )}
@@ -1517,7 +1382,7 @@ function AdminProducts() {
 
         )}
 
-      </section>
+      </div>
 
     </div>
   );
