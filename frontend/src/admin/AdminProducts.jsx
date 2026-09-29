@@ -58,14 +58,16 @@ function AdminProducts() {
      AUTH + FETCH PRODUCTS
   ========================================================= */
 
-  useEffect(() => {
-    if (!token) {
-      navigate("/admin/login");
-      return;
-    }
+ useEffect(() => {
+  const token = getAdminToken();
 
-    fetchProducts();
-  }, [token, navigate]);
+  if (!token) {
+    navigate("/admin/login");
+    return;
+  }
+
+  fetchProducts();
+}, [navigate]);
 
   const fetchProducts = async () => {
     try {
