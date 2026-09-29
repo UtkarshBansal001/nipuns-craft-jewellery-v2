@@ -1009,3 +1009,24 @@
   }
 
 }
+
+.admin-products-back-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 14px;
+  padding: 9px 16px;
+  border: 1px solid #d8d2c8;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #222;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-products-back-button:hover {
+  background: #f3f0eb;
+  transform: translateX(-2px);
+}

@@ -50,7 +50,9 @@ function AdminProducts() {
 
   const productFormRef = useRef(null);
 
-  const token = localStorage.getItem("adminToken");
+  const getAdminToken = () => {
+  return localStorage.getItem("adminToken");
+};
 
   /* =========================================================
      AUTH + FETCH PRODUCTS
@@ -377,6 +379,13 @@ function AdminProducts() {
       setSaving(true);
       setMessage("");
 
+      const token = getAdminToken();
+
+if (!token) {
+  navigate("/admin/login");
+  return;
+}
+
       /* =====================================================
          OLD / EXISTING IMAGES
       ===================================================== */
@@ -646,13 +655,21 @@ function AdminProducts() {
 
       <div className="admin-products-header">
 
-        <div>
-          <h1>Products</h1>
+  <div>
+    <button
+      type="button"
+      className="admin-products-back-button"
+      onClick={() => navigate(-1)}
+    >
+      ← Back
+    </button>
 
-          <p>
-            Manage your jewellery products
-          </p>
-        </div>
+    <h1>Products</h1>
+
+    <p>
+      Manage your jewellery products
+    </p>
+  </div>
 
         <button
           type="button"

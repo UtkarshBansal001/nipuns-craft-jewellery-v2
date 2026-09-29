@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import "./AdminOrders.css";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 function AdminOrders() {
+  const navigate = useNavigate();
+
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -250,7 +253,16 @@ function AdminOrders() {
   return (
     <main className="admin-orders-page">
       <div className="admin-orders-header">
+
         <div>
+          <button
+            type="button"
+            className="admin-orders-back-button"
+            onClick={() => navigate(-1)}
+          >
+            ← Back
+          </button>
+
           <p>NIPUN'S CRAFT JEWELLERY</p>
           <h1>Orders</h1>
         </div>
