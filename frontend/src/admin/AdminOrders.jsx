@@ -152,7 +152,8 @@ function AdminOrders() {
       const response = await axios.put(
         `${API_URL}/api/orders/admin/${orderId}/status`,
         {
-          orderStatus: newStatus,
+           status: newStatus,
+
         },
         {
           headers: {
@@ -199,7 +200,7 @@ function AdminOrders() {
       const response = await axios.put(
         `${API_URL}/api/orders/admin/${shippingOrder._id}/status`,
         {
-          orderStatus: "Shipped",
+          status: "Shipped",
           courierName:
             courierName.trim(),
           trackingNumber:
