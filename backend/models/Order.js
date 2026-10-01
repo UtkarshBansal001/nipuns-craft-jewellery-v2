@@ -138,6 +138,30 @@ const orderSchema = new mongoose.Schema(
       default: "",
     },
 
+        // ======================================================
+    // SHIPROCKET
+    // ======================================================
+
+    shiprocketOrderId: {
+      type: String,
+      default: "",
+    },
+
+    shiprocketShipmentId: {
+      type: String,
+      default: "",
+    },
+
+    awbCode: {
+      type: String,
+      default: "",
+    },
+
+    shiprocketStatus: {
+      type: String,
+      default: "",
+    },
+
     shippedAt: {
       type: Date,
       default: null,
