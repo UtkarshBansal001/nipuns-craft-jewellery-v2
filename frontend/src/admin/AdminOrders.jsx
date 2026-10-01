@@ -150,7 +150,7 @@ function AdminOrders() {
         localStorage.getItem("adminToken");
 
       const response = await axios.put(
-        `${API_URL}/api/orders/admin/${orderId}/status`,
+        `${API_URL}/api/orders/${orderId}/status`,
         {
            status: newStatus,
 
@@ -198,7 +198,7 @@ function AdminOrders() {
         localStorage.getItem("adminToken");
 
       const response = await axios.put(
-        `${API_URL}/api/orders/admin/${shippingOrder._id}/status`,
+        `${API_URL}/api/orders/${shippingOrder._id}/status`,
         {
           status: "Shipped",
           courierName:
